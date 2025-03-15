@@ -35,8 +35,8 @@ service /v1 on new http:Listener(8080) {
         _ = check dbClient->execute(query);
 
         foreach OrderPizza pizza in orderRequest.pizzas {
-            sql:ParameterizedQuery pizzaQuery = `INSERT INTO order_pizzas (order_id, pizza_id, quantity) 
-                                               VALUES (${newOrder.id}, ${pizza.pizzaId}, ${pizza.quantity})`;
+            sql:ParameterizedQuery pizzaQuery = `INSERT INTO order_pizzas (order_id, pizza_id, quantity, customizations) 
+                                               VALUES (${newOrder.id}, ${pizza.pizzaId}, ${pizza.quantity}, ${pizza.customizations.toJsonString()})`;
             _ = check dbClient->execute(pizzaQuery);
         }
 
@@ -52,7 +52,13 @@ service /v1 on new http:Listener(8080) {
         }
         stream<Order, sql:Error?> orderStream = dbClient->query(query);
         Order[] orders = check from Order 'order in orderStream
-            select 'order;
+            select {
+                id: 'order.id,
+                customerId: 'order.customerId,
+                status: 'order.status,
+                totalPrice: 'order.totalPrice,
+                pizzas: check getOrderPizzas('order.customerId)
+            };
         return orders;
     }
 
@@ -62,6 +68,7 @@ service /v1 on new http:Listener(8080) {
         if 'order is () {
             return error("Order not found");
         }
+        'order.pizzas = check getOrderPizzas('order.customerId);
         return 'order;
     }
 
@@ -78,6 +85,41 @@ service /v1 on new http:Listener(8080) {
         if updatedOrder is () {
             return error("Order not found after update");
         }
+        updatedOrder.pizzas = check getOrderPizzas(updatedOrder.customerId);
         return updatedOrder;
     }
+}
+
+isolated function getOrderPizzas(string customerId) returns OrderPizza[]|error {
+    sql:ParameterizedQuery query = `
+        SELECT op.pizza_id, 
+               COUNT(op.pizza_id) as quantity, 
+               JSON_ARRAYAGG(op.customizations) as customizations
+        FROM order_pizzas op
+        INNER JOIN orders o ON op.order_id = o.id
+        WHERE o.customer_id = ${customerId}
+        GROUP BY op.pizza_id`;
+
+    stream<OrderPizza, sql:Error?> pizzaStream = dbClient->query(query);
+    OrderPizza[] orderPizzas = check from OrderPizza orderPizza in pizzaStream
+        select {
+            pizzaId: orderPizza.pizzaId,
+            quantity: orderPizza.quantity,
+            customizations: flattenJsonArray(orderPizza.customizations)
+        };
+    return orderPizzas;
+}
+
+isolated function flattenJsonArray(json arr, json[] result = []) returns json[] {
+    if arr !is json[] {
+        return result;
+    }
+    foreach var item in arr {
+        if item is json[] {
+            result.push(...flattenJsonArray(item, result));
+        } else {
+            result.push(item);
+        }
+    }
+    return result;
 }
