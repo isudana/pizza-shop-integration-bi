@@ -1,6 +1,7 @@
 import ballerina/http;
 import ballerina/sql;
 import ballerina/uuid;
+import ballerinax/ai.agent;
 import ballerinax/mysql;
 import ballerinax/mysql.driver as _;
 
@@ -150,4 +151,14 @@ isolated function getPizzasFromDb() returns Pizza[]|error {
     Pizza[] pizzas = check from Pizza pizza in pizzaStream
         select pizza;
     return pizzas;
+}
+
+listener agent:Listener orderManagementAgentListener = new (listenOn = check http:getDefaultListener());
+
+service /orderManagementAgent on orderManagementAgentListener {
+    resource function post chat(@http:Payload agent:ChatReqMessage request) returns agent:ChatRespMessage|error {
+
+        string stringResult = check _orderManagementAgentAgent->run(request.message);
+        return {message: stringResult};
+    }
 }

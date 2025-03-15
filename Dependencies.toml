@@ -16,6 +16,7 @@ dependencies = [
 	{org = "ballerina", name = "sql"},
 	{org = "ballerina", name = "test"},
 	{org = "ballerina", name = "uuid"},
+	{org = "ballerinax", name = "ai.agent"},
 	{org = "ballerinax", name = "mysql"},
 	{org = "ballerinax", name = "mysql.driver"}
 ]
@@ -348,6 +349,73 @@ modules = [
 ]
 
 [[package]]
+org = "ballerina"
+name = "xmldata"
+version = "2.9.0"
+dependencies = [
+	{org = "ballerina", name = "jballerina.java"}
+]
+
+[[package]]
+org = "ballerina"
+name = "yaml"
+version = "0.8.0"
+dependencies = [
+	{org = "ballerina", name = "file"},
+	{org = "ballerina", name = "io"},
+	{org = "ballerina", name = "lang.array"},
+	{org = "ballerina", name = "lang.regexp"},
+	{org = "ballerina", name = "log"}
+]
+
+[[package]]
+org = "ballerinai"
+name = "observe"
+version = "0.0.0"
+dependencies = [
+	{org = "ballerina", name = "jballerina.java"},
+	{org = "ballerina", name = "observe"}
+]
+
+[[package]]
+org = "ballerinax"
+name = "ai.agent"
+version = "0.7.17"
+dependencies = [
+	{org = "ballerina", name = "constraint"},
+	{org = "ballerina", name = "data.jsondata"},
+	{org = "ballerina", name = "file"},
+	{org = "ballerina", name = "http"},
+	{org = "ballerina", name = "io"},
+	{org = "ballerina", name = "jballerina.java"},
+	{org = "ballerina", name = "lang.regexp"},
+	{org = "ballerina", name = "log"},
+	{org = "ballerina", name = "mime"},
+	{org = "ballerina", name = "os"},
+	{org = "ballerina", name = "url"},
+	{org = "ballerina", name = "uuid"},
+	{org = "ballerina", name = "xmldata"},
+	{org = "ballerina", name = "yaml"},
+	{org = "ballerinax", name = "azure.openai.chat"},
+	{org = "ballerinax", name = "openai.chat"}
+]
+modules = [
+	{org = "ballerinax", packageName = "ai.agent", moduleName = "ai.agent"},
+	{org = "ballerinax", packageName = "ai.agent", moduleName = "ai.agent.mistral"}
+]
+
+[[package]]
+org = "ballerinax"
+name = "azure.openai.chat"
+version = "3.0.1"
+dependencies = [
+	{org = "ballerina", name = "constraint"},
+	{org = "ballerina", name = "http"},
+	{org = "ballerina", name = "url"},
+	{org = "ballerinai", name = "observe"}
+]
+
+[[package]]
 org = "ballerinax"
 name = "mysql"
 version = "1.15.0"
@@ -368,5 +436,18 @@ name = "mysql.driver"
 version = "1.8.0"
 modules = [
 	{org = "ballerinax", packageName = "mysql.driver", moduleName = "mysql.driver"}
+]
+
+[[package]]
+org = "ballerinax"
+name = "openai.chat"
+version = "4.0.0"
+dependencies = [
+	{org = "ballerina", name = "constraint"},
+	{org = "ballerina", name = "http"},
+	{org = "ballerina", name = "log"},
+	{org = "ballerina", name = "os"},
+	{org = "ballerina", name = "url"},
+	{org = "ballerinai", name = "observe"}
 ]
 
