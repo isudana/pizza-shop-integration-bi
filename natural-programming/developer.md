@@ -1,0 +1,1 @@
+Generate test cases for the OpenAPI specification of a pizza shop's order management system using /v1 service.

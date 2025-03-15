@@ -1,0 +1,5 @@
+dbHost = "localhost"
+dbUser = "root"
+dbPassword = "root"
+dbName = "pizza_shop_test"
+dbPort = 3306
