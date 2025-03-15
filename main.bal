@@ -13,20 +13,17 @@ final mysql:Client dbClient = check new (
 );
 
 service /v1 on new http:Listener(8080) {
+
     resource function get pizzas() returns Pizza[]|error {
-        sql:ParameterizedQuery query = `SELECT * FROM pizzas`;
-        stream<Pizza, sql:Error?> pizzaStream = dbClient->query(query);
-        Pizza[] pizzas = check from Pizza pizza in pizzaStream
-            select pizza;
-        return pizzas;
+        return getPizzasFromDb();
     }
 
     resource function post orders(@http:Payload OrderRequest orderRequest) returns Order|error {
         Order newOrder = {
             id: uuid:createType1AsString(),
             customerId: orderRequest.customerId,
-            status: "PENDING",
-            totalPrice: 0.0,
+            status: PENDING,
+            totalPrice: check getTotalPrice(orderRequest.pizzas),
             pizzas: orderRequest.pizzas
         };
 
@@ -122,4 +119,35 @@ isolated function flattenJsonArray(json arr, json[] result = []) returns json[] 
         }
     }
     return result;
+}
+
+isolated function getTotalPrice(OrderPizza[] orderPizzas) returns decimal|error {
+    decimal totalPrice = 0;
+    Pizza[] pizzas = check getPizzasFromDb();
+    foreach OrderPizza orderPizza in orderPizzas {
+        Pizza? matchingPizza = getPizza(pizzas, orderPizza.pizzaId);
+
+        if matchingPizza is Pizza {
+            totalPrice += matchingPizza.basePrice * <decimal>orderPizza.quantity;
+        }
+    }
+
+    return totalPrice;
+}
+
+isolated function getPizza(Pizza[] pizzas, string pizzaId) returns Pizza? {
+    foreach var pizza in pizzas {
+        if pizza.id == pizzaId {
+            return pizza;
+        }
+    }
+    return;
+}
+
+isolated function getPizzasFromDb() returns Pizza[]|error {
+    sql:ParameterizedQuery query = `SELECT * FROM pizzas`;
+    stream<Pizza, sql:Error?> pizzaStream = dbClient->query(query);
+    Pizza[] pizzas = check from Pizza pizza in pizzaStream
+        select pizza;
+    return pizzas;
 }
