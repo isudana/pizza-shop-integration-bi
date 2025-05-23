@@ -12,7 +12,7 @@ CREATE TABLE
 CREATE TABLE
     orders (
         id VARCHAR(36) PRIMARY KEY,
-        customer_id VARCHAR(36) NOT NULL,
+        customer_name VARCHAR(36) NOT NULL,
         status ENUM (
             'PENDING',
             'PREPARING',

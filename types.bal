@@ -21,7 +21,7 @@ type OrderPizza record {|
 |};
 
 type OrderRequest record {|
-    string customerId;
+    string customerName;
     OrderPizza[] pizzas;
 |};
 
@@ -36,9 +36,9 @@ enum OrderStatus {
 type Order record {|
     string id;
     @sql:Column {
-        name: "customer_id"
+        name: "customer_name"
     }
-    string customerId;
+    string customerName;
     OrderStatus status;
     @sql:Column {
         name: "total_price"

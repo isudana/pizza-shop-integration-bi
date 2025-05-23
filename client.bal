@@ -1,12 +1,12 @@
 import ballerina/http;
-import ballerinax/ai.agent;
+import ballerinax/ai;
 
 final http:Client pizzaClient = check new ("http://localhost:8080/v1");
 
 # Retrieves all available pizzas.
 #
 # + return - Array of pizzas or error
-@agent:Tool
+@ai:AgentTool
 @display {
     label: "",
     iconPath: ""
@@ -20,7 +20,7 @@ isolated function getPizzas() returns Pizza[]|error {
 #
 # + orderRequest - The order details
 # + return - Created order or error
-@agent:Tool
+@ai:AgentTool
 @display {
     label: "",
     iconPath: ""
@@ -32,28 +32,22 @@ isolated function createOrder(OrderRequest orderRequest) returns Order|error {
 
 # Retrieves all orders with optional customer filter.
 #
-# + customerId - Optional customer ID to filter orders
+# + customerName - customer Name to filter orders
 # + return - Array of orders or error
-@agent:Tool
+@ai:AgentTool
 @display {
     label: "",
     iconPath: ""
 }
-isolated function getOrders(string? customerId = ()) returns Order[]|error {
-    Order[] orders;
-    if customerId is string {
-        orders = check pizzaClient->/orders(customerId = customerId);
-    } else {
-        orders = check pizzaClient->/orders;
-    }
-    return orders;
+isolated function getOrders(string customerName) returns Order[]|error {
+    return pizzaClient->/orders(customerName = customerName);
 }
 
 # Retrieves a specific order by ID.
 #
 # + orderId - ID of the order to retrieve
 # + return - Order details or error
-@agent:Tool
+@ai:AgentTool
 @display {
     label: "",
     iconPath: ""
@@ -68,7 +62,7 @@ isolated function getOrder(string orderId) returns Order|error {
 # + orderId - ID of the order to update
 # + orderUpdate - New status for the order
 # + return - Updated order or error
-@agent:Tool
+@ai:AgentTool
 @display {
     label: "",
     iconPath: ""

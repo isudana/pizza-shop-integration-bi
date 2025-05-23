@@ -1,10 +1,7 @@
-configurable string dbHost = ?;
-configurable string dbUser = ?;
-configurable string dbPassword = ?;
-configurable string dbName = ?;
+configurable string dbHost = "localhost";
+configurable string dbUser = "user";
+configurable string dbPassword = "userpass";
+configurable string dbName = "pizza_shop";
 configurable int dbPort = 3306;
 
-configurable string apiKey = ?;
-configurable string serviceUrl = ?;
-configurable string apiVersion = ?;
-configurable string deploymentId = ?;
+configurable string openAiApiKey = ?;

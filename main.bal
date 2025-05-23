@@ -1,7 +1,7 @@
 import ballerina/http;
 import ballerina/sql;
 import ballerina/uuid;
-import ballerinax/ai.agent;
+import ballerinax/ai;
 import ballerinax/mysql;
 import ballerinax/mysql.driver as _;
 
@@ -22,14 +22,14 @@ service /v1 on new http:Listener(8080) {
     resource function post orders(@http:Payload OrderRequest orderRequest) returns Order|error {
         Order newOrder = {
             id: uuid:createType1AsString(),
-            customerId: orderRequest.customerId,
+            customerName: orderRequest.customerName,
             status: PENDING,
             totalPrice: check getTotalPrice(orderRequest.pizzas),
             pizzas: orderRequest.pizzas
         };
 
-        sql:ParameterizedQuery query = `INSERT INTO orders (id, customer_id, status, total_price) 
-                                      VALUES (${newOrder.id}, ${newOrder.customerId}, ${newOrder.status}, ${newOrder.totalPrice})`;
+        sql:ParameterizedQuery query = `INSERT INTO orders (id, customer_name, status, total_price) 
+                                      VALUES (${newOrder.id}, ${newOrder.customerName}, ${newOrder.status}, ${newOrder.totalPrice})`;
         _ = check dbClient->execute(query);
 
         foreach OrderPizza pizza in orderRequest.pizzas {
@@ -41,21 +41,16 @@ service /v1 on new http:Listener(8080) {
         return newOrder;
     }
 
-    resource function get orders(string? customerId) returns Order[]|error {
-        sql:ParameterizedQuery query;
-        if customerId is string {
-            query = `SELECT * FROM orders WHERE customer_id = ${customerId}`;
-        } else {
-            query = `SELECT * FROM orders`;
-        }
+    resource function get orders(string customerName) returns Order[]|error {
+        sql:ParameterizedQuery query = `SELECT * FROM orders WHERE customer_name = ${customerName}`;
         stream<Order, sql:Error?> orderStream = dbClient->query(query);
         Order[] orders = check from Order 'order in orderStream
             select {
                 id: 'order.id,
-                customerId: 'order.customerId,
+                customerName: 'order.customerName,
                 status: 'order.status,
                 totalPrice: 'order.totalPrice,
-                pizzas: check getOrderPizzas('order.customerId)
+                pizzas: check getOrderPizzas('order.customerName)
             };
         return orders;
     }
@@ -66,7 +61,7 @@ service /v1 on new http:Listener(8080) {
         if 'order is () {
             return error("Order not found");
         }
-        'order.pizzas = check getOrderPizzas('order.customerId);
+        'order.pizzas = check getOrderPizzas('order.customerName);
         return 'order;
     }
 
@@ -83,19 +78,19 @@ service /v1 on new http:Listener(8080) {
         if updatedOrder is () {
             return error("Order not found after update");
         }
-        updatedOrder.pizzas = check getOrderPizzas(updatedOrder.customerId);
+        updatedOrder.pizzas = check getOrderPizzas(updatedOrder.customerName);
         return updatedOrder;
     }
 }
 
-isolated function getOrderPizzas(string customerId) returns OrderPizza[]|error {
+isolated function getOrderPizzas(string customerName) returns OrderPizza[]|error {
     sql:ParameterizedQuery query = `
         SELECT op.pizza_id, 
-               COUNT(op.pizza_id) as quantity, 
+               CAST(SUM(op.quantity) AS UNSIGNED) as quantity, 
                JSON_ARRAYAGG(op.customizations) as customizations
         FROM order_pizzas op
         INNER JOIN orders o ON op.order_id = o.id
-        WHERE o.customer_id = ${customerId}
+        WHERE o.customer_name = ${customerName}
         GROUP BY op.pizza_id`;
 
     stream<OrderPizza, sql:Error?> pizzaStream = dbClient->query(query);
@@ -153,10 +148,10 @@ isolated function getPizzasFromDb() returns Pizza[]|error {
     return pizzas;
 }
 
-listener agent:Listener orderManagementAgentListener = new (listenOn = check http:getDefaultListener());
+listener ai:Listener orderManagementAgentListener = new (listenOn = check http:getDefaultListener());
 
 service /orderManagementAgent on orderManagementAgentListener {
-    resource function post chat(@http:Payload agent:ChatReqMessage request) returns agent:ChatRespMessage|error {
+    resource function post chat(@http:Payload ai:ChatReqMessage request) returns ai:ChatRespMessage|error {
 
         string stringResult = check _orderManagementAgentAgent->run(request.message);
         return {message: stringResult};

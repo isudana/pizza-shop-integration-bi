@@ -46,9 +46,9 @@ paths:
       summary: Retrieve customer's orders
       operationId: listOrders
       parameters:
-        - name: customerId
+        - name: customerName
           in: query
-          required: false
+          required: true
           schema:
             type: string
       responses:
@@ -122,10 +122,10 @@ components:
     OrderRequest:
       type: object
       required:
-        - customerId
+        - customerName
         - pizzas
       properties:
-        customerId:
+        customerName:
           type: string
         pizzas:
           type: array
@@ -146,7 +146,7 @@ components:
       properties:
         id:
           type: string
-        customerId:
+        customerName:
           type: string
         status:
           type: string
