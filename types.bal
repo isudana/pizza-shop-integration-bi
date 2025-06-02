@@ -36,7 +36,7 @@ enum OrderStatus {
 type Order record {|
     string id;
     @sql:Column {
-        name: "customer_name"
+        name: "customer_id"
     }
     string customerName;
     OrderStatus status;

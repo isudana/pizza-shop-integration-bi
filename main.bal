@@ -28,7 +28,7 @@ service /v1 on new http:Listener(8080) {
             pizzas: orderRequest.pizzas
         };
 
-        sql:ParameterizedQuery query = `INSERT INTO orders (id, customer_name, status, total_price) 
+        sql:ParameterizedQuery query = `INSERT INTO orders (id, customer_id, status, total_price) 
                                       VALUES (${newOrder.id}, ${newOrder.customerName}, ${newOrder.status}, ${newOrder.totalPrice})`;
         _ = check dbClient->execute(query);
 
@@ -42,7 +42,7 @@ service /v1 on new http:Listener(8080) {
     }
 
     resource function get orders(string customerName) returns Order[]|error {
-        sql:ParameterizedQuery query = `SELECT * FROM orders WHERE customer_name = ${customerName}`;
+        sql:ParameterizedQuery query = `SELECT * FROM orders WHERE customer_id = ${customerName}`;
         stream<Order, sql:Error?> orderStream = dbClient->query(query);
         Order[] orders = check from Order 'order in orderStream
             select {
@@ -90,7 +90,7 @@ isolated function getOrderPizzas(string customerName) returns OrderPizza[]|error
                JSON_ARRAYAGG(op.customizations) as customizations
         FROM order_pizzas op
         INNER JOIN orders o ON op.order_id = o.id
-        WHERE o.customer_name = ${customerName}
+        WHERE o.customer_id = ${customerName}
         GROUP BY op.pizza_id`;
 
     stream<OrderPizza, sql:Error?> pizzaStream = dbClient->query(query);
@@ -149,11 +149,3 @@ isolated function getPizzasFromDb() returns Pizza[]|error {
 }
 
 listener ai:Listener orderManagementAgentListener = new (listenOn = check http:getDefaultListener());
-
-service /orderManagementAgent on orderManagementAgentListener {
-    resource function post chat(@http:Payload ai:ChatReqMessage request) returns ai:ChatRespMessage|error {
-
-        string stringResult = check _orderManagementAgentAgent->run(request.message);
-        return {message: stringResult};
-    }
-}
