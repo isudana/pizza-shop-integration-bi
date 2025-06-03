@@ -17,7 +17,8 @@ dependencies = [
 	{org = "ballerina", name = "uuid"},
 	{org = "ballerinax", name = "ai"},
 	{org = "ballerinax", name = "mysql"},
-	{org = "ballerinax", name = "mysql.driver"}
+	{org = "ballerinax", name = "mysql.driver"},
+	{org = "ballerinax", name = "wso2.controlplane"}
 ]
 modules = [
 	{org = "admin", packageName = "pizza", moduleName = "pizza"}
@@ -437,5 +438,24 @@ dependencies = [
 	{org = "ballerina", name = "os"},
 	{org = "ballerina", name = "url"},
 	{org = "ballerinai", name = "observe"}
+]
+
+[[package]]
+org = "ballerinax"
+name = "wso2.controlplane"
+version = "1.1.0"
+dependencies = [
+	{org = "ballerina", name = "file"},
+	{org = "ballerina", name = "http"},
+	{org = "ballerina", name = "jballerina.java"},
+	{org = "ballerina", name = "jwt"},
+	{org = "ballerina", name = "lang.array"},
+	{org = "ballerina", name = "lang.runtime"},
+	{org = "ballerina", name = "log"},
+	{org = "ballerina", name = "os"},
+	{org = "ballerina", name = "uuid"}
+]
+modules = [
+	{org = "ballerinax", packageName = "wso2.controlplane", moduleName = "wso2.controlplane"}
 ]
 

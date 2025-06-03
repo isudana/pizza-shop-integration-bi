@@ -4,6 +4,7 @@ import ballerina/uuid;
 import ballerinax/ai;
 import ballerinax/mysql;
 import ballerinax/mysql.driver as _;
+import ballerinax/wso2.controlplane as _;
 
 final mysql:Client dbClient = check new (
     host = dbHost,
